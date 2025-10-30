@@ -1,0 +1,31 @@
+xxx.com {
+    encode gzip zstd
+
+    @proxy_methods {
+        method GET HEAD
+    }
+
+    handle @proxy_methods {
+        reverse_proxy 127.0.0.1:3000 {
+            flush_interval -1
+            transport http {
+                versions 1.1
+                keepalive 32
+            }
+        }
+    }
+
+    handle {
+        respond 405 {
+            body "405: method not allowed\n"
+        }
+    }
+
+    log {
+        output file /var/log/caddy/crossfetch.log {
+            roll_size 10mb
+            roll_keep 10
+        }
+        format single_field common_log
+    }
+}
